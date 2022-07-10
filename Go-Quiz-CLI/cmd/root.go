@@ -13,8 +13,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "qo-quiz-cli",
-	Short: "A brief description of your application",
-	Long:  `yo yo yo.`,
+	Short: "A simple Math-Quiz",
+	Long:  `A simple Math-Quiz written in Go.`,
 
 	CompletionOptions: cobra.CompletionOptions{
 		DisableDefaultCmd: true,

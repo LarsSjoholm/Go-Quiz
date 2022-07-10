@@ -16,8 +16,8 @@ import (
 
 var quizCmd = &cobra.Command{
 	Use:   "quiz",
-	Short: "A simple Math-Quiz",
-	Long:  `A simple Math-Quiz written in Go.`,
+	Short: "Runs the quiz",
+	Long:  `This sub-command runs the Math-Quiz.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		r := result{}
 		q := quiz{}
@@ -68,8 +68,6 @@ func postQuiz(q *quiz, r *result) {
 	if err := json.Unmarshal(responseBytes, r); err != nil {
 		log.Printf("Could not unmarshal response - %v", err)
 	}
-
-	return
 }
 
 func RunQuiz(q *quiz) {
@@ -84,27 +82,16 @@ func RunQuiz(q *quiz) {
 		a, _ := reader.ReadString('\n')
 		q.Questions[i].ChoosenChoiceID = strings.Trim(strings.Replace(a, "\r\n", "", -1), "\n")
 	}
-	return
-}
-
-func ShowResult(r *result) {
-	fmt.Printf("\nScore: %v\n", r.Score)
-	fmt.Println(r.Percentile)
 }
 
 func getQuizData(baseAPI string) []byte {
-	request, err := http.NewRequest(http.MethodGet, baseAPI, nil)
-	if err != nil {
-		log.Printf("Could not request a quiz - %v", err)
-	}
-	request.Header.Add("Accept", "application/json")
 
-	response, err := http.DefaultClient.Do(request)
+	resp, err := http.Get(baseAPI)
 	if err != nil {
-		log.Printf("Could not make a request - %v", err)
+		log.Printf("Could not make a Get call - %v", err)
 	}
 
-	responseBytes, err := ioutil.ReadAll(response.Body)
+	responseBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Could not read a response body - %v", err)
 	}
@@ -113,20 +100,25 @@ func getQuizData(baseAPI string) []byte {
 }
 
 func postQuizData(baseAPI string, q *quiz) []byte {
-	reqBody, err := json.Marshal(q)
+	req, err := json.Marshal(q)
 	if err != nil {
-		print(err)
+		log.Printf("Could not marshal quiz - %v", err)
 	}
 	resp, err := http.Post(baseAPI,
-		"application/json", bytes.NewBuffer(reqBody))
+		"application/json", bytes.NewBuffer(req))
 	if err != nil {
-		print(err)
+		log.Printf("Could not make a Post call - %v", err)
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		print(err)
+		log.Printf("Could not read a response body - %v", err)
 	}
 
 	return body
+}
+
+func ShowResult(r *result) {
+	fmt.Printf("\nScore: %v\n", r.Score)
+	fmt.Println(r.Percentile)
 }
